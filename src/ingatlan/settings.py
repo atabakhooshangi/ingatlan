@@ -10,23 +10,25 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
+from dotenv import load_dotenv
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+env_path = Path(f"{BASE_DIR}/.env")
+load_dotenv(dotenv_path=env_path)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-2!3&za&u(#5((g%d3kqs%7*b=bg^d6_j&xhj3%$o=h@3#+sw)b'
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(int(os.environ.get("DEBUG", 1)))
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -37,16 +39,43 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'src.cases.apps.CasesConfig',
-    'src.users.apps.UsersConfig',
+    'user',
+    'cases',
     "drf_yasg",
     "rest_framework",
-    "corsheaders",
+    "corsheaders"
 ]
+
+AUTH_USER_MODEL = "user.User"
+
+CORS_ALLOWED_ORIGINS = (
+    'http://localhost:8000',
+)
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
+
+CORS_ALLOW_HEADERS = (
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with'
+)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -75,16 +104,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ingatlan.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('PG_USER'),
+        'PASSWORD': os.environ.get('PG_PASSWORD'),
+        'HOST': os.environ.get('PG_HOST'),
+        'PORT': os.environ.get('PG_PORT'),
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -105,7 +144,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -117,13 +155,35 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+MEDIA_URLS = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# # Rest framework
+# REST_FRAMEWORK = {
+#     "DEFAULT_AUTHENTICATION_CLASSES": [
+#         "core.authentication.UserJWTAuthentication",
+#     ],
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated',
+#     ],
+#     'DEFAULT_FILTER_BACKENDS': [
+#         'rest_framework.filters.SearchFilter',
+#         'rest_framework.filters.OrderingFilter',
+#     ],
+# }
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+OTP_EXPIRE_MINUTES = os.environ.get("OTP_EXPIRE_MINUTES", 5)
+
+BASE_URL = os.environ.get("BASE_URL", "http://localhost:8000")
+PROJECT_NAME = os.environ.get("PROJECT_NAME", "ingatlan")
