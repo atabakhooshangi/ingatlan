@@ -3,7 +3,8 @@ from rest_framework import exceptions
 
 
 class UserManager(BaseUserManager):
-
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True)
     def create_user(self, email, password=None):
         if not email:
             raise exceptions.ValidationError({'Email': ['Email is Required.']})

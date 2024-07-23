@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 import datetime
-from user.models.base import Base
+from ingatlan.base import Base
 
 
 class OTP(Base):

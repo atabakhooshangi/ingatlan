@@ -1,6 +1,7 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from user.models.choices.choices import GenderChoiceType
 from user.models.managers.user_manager import UserManager
@@ -43,15 +44,14 @@ class User(AbstractBaseUser, PermissionsMixin):
                 return False
         return True
 
-    #
-    # @property
-    # def tokens(self):
-    #     token = RefreshToken.for_user(self)
-    #     data = {
-    #         'refresh': str(token),
-    #         'access': str(token.access_token)
-    #     }
-    #     return data
+    @property
+    def tokens(self):
+        token = RefreshToken.for_user(self)
+        data = {
+            'access': str(token.access_token),
+            'refresh': str(token)
+        }
+        return data
 
     def has_perm(self, perm, obj=None):
         return self.is_admin

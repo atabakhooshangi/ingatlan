@@ -1,3 +1,7 @@
 from django.contrib import admin
+from cases.models import Case, Gallery
 
-# Register your models here.
+
+admin.register(Case)
+admin.register(Gallery)
+

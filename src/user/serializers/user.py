@@ -41,6 +41,26 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         for key, value in data.items():
             setattr(user, key, value)
+        user.is_active = True
         user.save()
 
         return user
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(required=True)
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+        user = User.objects.filter(email=email).first()
+        if user is None:
+            raise serializers.ValidationError({'email': 'User not found.'})
+        if not user.check_password(password):
+            raise serializers.ValidationError({'password': 'Invalid Password.'})
+        attrs['tokens'] = user.tokens
+        return attrs
+
+    def get_tokens(self):
+        return self.validated_data['tokens']
